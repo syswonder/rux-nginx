@@ -127,8 +127,7 @@ $(OUT_BIN): $(OUT_ELF)
 objs/nginx_aarch64-qemu-q35.elf:	objs/nginx_app.o
 
 	$(LINK) -o objs/nginx_aarch64-qemu-q35.elf \
-	/home/oslab/Desktop/rukos/ulib/axlibc/build_aarch64/libc.a \
-	/home/oslab/Desktop/rukos/target/aarch64-unknown-none-softfloat/release/libaxlibc.a \
+	../../../../ulib/axmusl/install/lib/libc.a \
 	objs/nginx_app.o
 	
 objs/nginx_app.o:	objs/src/core/nginx.o \
