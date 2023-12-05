@@ -1,10 +1,10 @@
 
 CC =	aarch64-linux-musl-gcc
 #CFLAGS =  -pipe  -O -W -Wall -Wpointer-arith -Wno-unused-parameter -g 
-CFLAGS = -DAX_CONFIG_SMP -DAX_CONFIG_ALLOC -DAX_CONFIG_FP_SIMD -DAX_CONFIG_MULTITASK -DAX_CONFIG_FS -DAX_CONFIG_NET -DAX_CONFIG_PIPE -DAX_CONFIG_EPOLL -DAX_CONFIG_POLL -DAX_CONFIG_FD -DAX_LOG_INFO -DAX_CONFIG_SELECT -nostdinc -fno-builtin -ffreestanding -Wall -I/home/oslab/Desktop/rukos/ulib/axlibc/include -O3 -Wno-format
+CFLAGS = -DAX_CONFIG_SMP -DAX_CONFIG_ALLOC -DAX_CONFIG_FP_SIMD -DAX_CONFIG_MULTITASK -DAX_CONFIG_FS -DAX_CONFIG_NET -DAX_CONFIG_PIPE -DAX_CONFIG_EPOLL -DAX_CONFIG_POLL -DAX_CONFIG_FD -DAX_LOG_INFO -DAX_CONFIG_SELECT -nostdinc -fno-builtin -ffreestanding -Wall -I../../../../ulib/axlibc/include -O3 -Wno-format
 CPP =	cc -E
 PLATFORM_NAME ?= aarch64-qemu-virt
-LD_SCRIPT := /home/oslab/Desktop/rukos/modules/axhal/linker_$(PLATFORM_NAME).lds
+LD_SCRIPT := ../../../../modules/axhal/linker_$(PLATFORM_NAME).lds
 LINK =	rust-lld -flavor gnu -nostdlib -static -no-pie --gc-sections -T$(LD_SCRIPT) --error-limit=0
 
 OBJCOPY ?= rust-objcopy --binary-architecture=aarch64
