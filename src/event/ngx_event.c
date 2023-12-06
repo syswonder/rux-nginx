@@ -425,12 +425,14 @@ ngx_event_init_conf(ngx_cycle_t *cycle, void *conf)
     ngx_core_conf_t  *ccf;
     ngx_listening_t  *ls;
 #endif
-
+    printf("lhw debug find page fault in ngx_event_init_conf cycle->conf_ctx: %p ngx_events_module index : %d \n",cycle->conf_ctx,ngx_events_module.index);
     if (ngx_get_conf(cycle->conf_ctx, ngx_events_module) == NULL) {
+        printf("lhw debug find page fault in ngx_event_init_conf 2\n");
         ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
                       "no \"events\" section in configuration");
         return NGX_CONF_ERROR;
     }
+    printf("lhw debug find page fault in ngx_event_init_conf 1\n");
 
     if (cycle->connection_n < cycle->listening.nelts + 1) {
 

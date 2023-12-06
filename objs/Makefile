@@ -1,11 +1,24 @@
 
 CC =	aarch64-linux-musl-gcc
-#CFLAGS =  -pipe  -O -W -Wall -Wpointer-arith -Wno-unused-parameter -g 
-CFLAGS = -DAX_CONFIG_SMP -DAX_CONFIG_ALLOC -DAX_CONFIG_FP_SIMD -DAX_CONFIG_MULTITASK -DAX_CONFIG_FS -DAX_CONFIG_NET -DAX_CONFIG_PIPE -DAX_CONFIG_EPOLL -DAX_CONFIG_POLL -DAX_CONFIG_FD -DAX_LOG_INFO -DAX_CONFIG_SELECT -nostdinc -fno-builtin -ffreestanding -Wall -I../../../../ulib/axlibc/include -O3 -Wno-format
+#CFLAGS =  -pipe  -O -W -Wall -Wpointer-arith -Wno-unused-parameter -g
+ifeq ($(MUSL), y)
+	CFLAGS = -DAX_CONFIG_SMP -DAX_CONFIG_ALLOC -DAX_CONFIG_FP_SIMD -DAX_CONFIG_MULTITASK -DAX_CONFIG_FS -DAX_CONFIG_NET -DAX_CONFIG_PIPE -DAX_CONFIG_EPOLL -DAX_CONFIG_POLL -DAX_CONFIG_FD -DAX_LOG_INFO -DAX_CONFIG_SELECT -nostdinc -fno-builtin -ffreestanding -Wall -I../../../../ulib/axmusl/musl-1.2.3/include -O3 -Wno-format
+else
+	CFLAGS = -DAX_CONFIG_SMP -DAX_CONFIG_ALLOC -DAX_CONFIG_FP_SIMD -DAX_CONFIG_MULTITASK -DAX_CONFIG_FS -DAX_CONFIG_NET -DAX_CONFIG_PIPE -DAX_CONFIG_EPOLL -DAX_CONFIG_POLL -DAX_CONFIG_FD -DAX_LOG_INFO -DAX_CONFIG_SELECT -nostdinc -fno-builtin -ffreestanding -Wall -I../../../../ulib/axlibc/include -O3 -Wno-format
+endif
+#CFLAGS = -DAX_CONFIG_SMP -DAX_CONFIG_ALLOC -DAX_CONFIG_FP_SIMD -DAX_CONFIG_MULTITASK -DAX_CONFIG_FS -DAX_CONFIG_NET -DAX_CONFIG_PIPE -DAX_CONFIG_EPOLL -DAX_CONFIG_POLL -DAX_CONFIG_FD -DAX_LOG_INFO -DAX_CONFIG_SELECT -nostdinc -fno-builtin -ffreestanding -Wall -O3 -Wno-format
 CPP =	cc -E
 PLATFORM_NAME ?= aarch64-qemu-virt
 LD_SCRIPT := ../../../../modules/axhal/linker_$(PLATFORM_NAME).lds
 LINK =	rust-lld -flavor gnu -nostdlib -static -no-pie --gc-sections -T$(LD_SCRIPT) --error-limit=0
+
+ifeq ($(MUSL), y)
+  LIBC = ../../../../ulib/axmusl/install/lib/libc.a
+else
+  LIBC = \
+        ../../../../ulib/axlibc/build_aarch64/libc.a \
+        ../../../../target/aarch64-unknown-none-softfloat/release/libaxlibc.a
+endif
 
 OBJCOPY ?= rust-objcopy --binary-architecture=aarch64
 FEAT = axfeat/log-level-info axfeat/paging axfeat/irq axlibc/smp axlibc/alloc axlibc/fp_simd axlibc/multitask axlibc/fs axlibc/net axlibc/pipe axlibc/epoll axlibc/poll axlibc/select axlibc/fd
@@ -122,12 +135,15 @@ _cargo_build:
 	$(call cargo_build,-p axlibc,$(FEAT))
 
 $(OUT_BIN): $(OUT_ELF)
+	@echo "use clib:"
+	@echo "($LIBC)"
 	$(call run_cmd,$(OBJCOPY),$(OUT_ELF) --strip-all -O binary $@)
+
 
 objs/nginx_aarch64-qemu-q35.elf:	objs/nginx_app.o
 
 	$(LINK) -o objs/nginx_aarch64-qemu-q35.elf \
-	../../../../ulib/axmusl/install/lib/libc.a \
+	$(LIBC) \
 	objs/nginx_app.o
 	
 objs/nginx_app.o:	objs/src/core/nginx.o \

@@ -112,10 +112,14 @@ ngx_log_error_core(ngx_uint_t level, ngx_log_t *log, ngx_err_t err,
     ngx_uint_t   wrote_stderr, debug_connection;
     u_char       errstr[NGX_MAX_ERROR_STR];
 
+    printf("lhw debug find page fault in ngx_log_error_core 0 dst: %p  src: %p n: %d\n",errstr, ngx_cached_err_log_time.data,
+                   ngx_cached_err_log_time.len);
+
     last = errstr + NGX_MAX_ERROR_STR;
 
     p = ngx_cpymem(errstr, ngx_cached_err_log_time.data,
                    ngx_cached_err_log_time.len);
+    printf("lhw debug find page fault in ngx_log_error_core 2\n");
 
     p = ngx_slprintf(p, last, " [%V] ", &err_levels[level]);
 
@@ -140,7 +144,7 @@ ngx_log_error_core(ngx_uint_t level, ngx_log_t *log, ngx_err_t err,
     p = ngx_vslprintf(p, last, fmt, args);
 
 #endif
-
+    printf("lhw debug find page fault in ngx_log_error_core 1\n");
     if (err) {
         p = ngx_log_errno(p, last, err);
     }
@@ -258,6 +262,7 @@ ngx_log_abort(ngx_err_t err, const char *fmt, ...)
 void ngx_cdecl
 ngx_log_stderr(ngx_err_t err, const char *fmt, ...)
 {
+    printf("lhw debug find page fault in ngx log stderr\n");
     u_char   *p, *last;
     va_list   args;
     u_char    errstr[NGX_MAX_ERROR_STR];
