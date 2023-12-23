@@ -129,15 +129,20 @@ HTTP_INCS = -I $(SRC)/src/http \
 OUT_BIN = ./nginx_aarch64-qemu-q35.bin
 OUT_ELF = ./nginx_aarch64-qemu-q35.elf
 
+.PHONY: all
+
+all: $(SRC)
+	make build
+
+build: binary modules
+	
+binary:	./nginx_app.o
+
 $(SRC):
 	@echo "Download nginx source code"
 	wget https://nginx.org/download/nginx-$(nginx-version).tar.gz
 	tar -zxvf nginx-$(nginx-version).tar.gz -C . && rm -f nginx-$(nginx-version).tar.gz
 
-
-build: $(SRC) binary modules
-	
-binary:	./nginx_app.o
 
 # binary:	$(OUT_BIN)
 
