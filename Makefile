@@ -12,7 +12,7 @@
 # LD_SCRIPT := ../../../../modules/axhal/linker_$(PLATFORM_NAME).lds
 # LINK =	rust-lld -flavor gnu -nostdlib -static -no-pie --gc-sections -T$(LD_SCRIPT) --error-limit=0
 nginx-version = 1.24.0
-SRC = ../nginx-$(nginx-version)
+SRC = nginx-$(nginx-version)
 
 # ifeq ($(MUSL), y)
 #   LIBC = ../../../../ulib/axmusl/install/lib/libc.a
@@ -129,8 +129,14 @@ HTTP_INCS = -I $(SRC)/src/http \
 OUT_BIN = ./nginx_aarch64-qemu-q35.bin
 OUT_ELF = ./nginx_aarch64-qemu-q35.elf
 
-build:	binary modules
+$(SRC):
+	@echo "Download nginx source code"
+	wget https://nginx.org/download/nginx-$(nginx-version).tar.gz
+	tar -zxvf nginx-$(nginx-version).tar.gz -C . && rm -f nginx-$(nginx-version).tar.gz
 
+
+build: $(SRC) binary modules
+	
 binary:	./nginx_app.o
 
 # binary:	$(OUT_BIN)
