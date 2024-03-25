@@ -319,27 +319,15 @@
 #endif
 
 #ifndef NGX_SSL
-#ifdef CONFIG_LIBSSL
 #define NGX_SSL  1
-#else
-#define NGX_SSL  0
-#endif
 #endif
 
 #ifndef NGX_OPENSSL
-#if defined(CONFIG_LIBSSL)
 #define NGX_OPENSSL  1
-#else
-#define NGX_OPENSSL  0
-#endif
 #endif
 
 #ifndef NGX_HTTP_SSL
-#ifdef CONFIG_LIBNGINX_HTTP_SSL
 #define NGX_HTTP_SSL  1
-#else
-#define NGX_HTTP_SSL  0
-#endif
 #endif
 
 #ifndef NGX_HTTP_CACHE
@@ -365,14 +353,8 @@
 #endif
 #endif
 
-#ifdef CONFIG_LIBCRYPTO
 #ifndef NGX_CRYPT
 #define NGX_CRYPT  1
-#endif
-#else
-#ifndef NGX_CRYPT
-#define NGX_CRYPT  0
-#endif
 #endif
 
 #ifndef NGX_HTTP_X_FORWARDED_FOR
@@ -406,6 +388,20 @@
 #define NGX_ZLIB  0
 #endif
 #endif
+
+#ifndef NGX_STAT_STUB
+#define NGX_STAT_STUB  1
+#endif
+
+#ifndef NGX_OPENSSL
+#define NGX_OPENSSL  1
+#endif
+
+
+#ifndef NGX_SSL
+#define NGX_SSL  1
+#endif
+
 
 #ifndef NGX_PREFIX
 #define NGX_PREFIX  "/nginx/"

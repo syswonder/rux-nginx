@@ -13,6 +13,7 @@
 # LINK =	rust-lld -flavor gnu -nostdlib -static -no-pie --gc-sections -T$(LD_SCRIPT) --error-limit=0
 nginx-version = 1.24.0
 SRC = nginx-$(nginx-version)
+OPENSSL = openssl-1.1.1w
 
 # ifeq ($(MUSL), y)
 #   LIBC = ../../../../ulib/axmusl/install/lib/libc.a
@@ -38,7 +39,8 @@ ALL_INCS = -I $(SRC)/src/core \
 	-I $(SRC)/src/os/unix \
 	-I . \
 	-I $(SRC)/src/http \
-	-I $(SRC)/src/http/modules
+	-I $(SRC)/src/http/modules \
+	-I $(OPENSSL)/include \
 
 
 CORE_DEPS = $(SRC)/src/core/nginx.h \
@@ -101,6 +103,8 @@ CORE_DEPS = $(SRC)/src/core/nginx.h \
 	$(SRC)/src/os/unix/ngx_process_cycle.h \
 	$(SRC)/src/os/unix/ngx_linux_config.h \
 	$(SRC)/src/os/unix/ngx_linux.h \
+	$(SRC)/src/event/ngx_event_openssl.h \
+	$(OPENSSL)/include/openssl/ssl.h \
 	ngx_auto_config.h
 
 
@@ -108,6 +112,7 @@ CORE_INCS = -I $(SRC)/src/core \
 	-I $(SRC)/src/event \
 	-I $(SRC)/src/event/modules \
 	-I $(SRC)/src/os/unix \
+	-I $(OPENSSL)/include \
 	-I .
 
 
@@ -120,15 +125,19 @@ HTTP_DEPS = $(SRC)/src/http/ngx_http.h \
 	$(SRC)/src/http/ngx_http_script.h \
 	$(SRC)/src/http/ngx_http_upstream.h \
 	$(SRC)/src/http/ngx_http_upstream_round_robin.h \
-	$(SRC)/src/http/modules/ngx_http_ssi_filter_module.h
+	$(SRC)/src/http/modules/ngx_http_ssi_filter_module.h \
+	$(SRC)/src/http/modules/ngx_http_ssl_module.h
 
 
 HTTP_INCS = -I $(SRC)/src/http \
 	-I $(SRC)/src/http/modules
 
+SSL_INCS = 	-I $(OPENSSL)/include
+
 OUT_BIN = ./nginx_aarch64-qemu-q35.bin
 OUT_ELF = ./nginx_aarch64-qemu-q35.elf
 
+NGINX_OBJ = nginx_app.o
 .PHONY: all
 
 all: $(SRC)
@@ -136,13 +145,16 @@ all: $(SRC)
 
 build: binary modules
 	
-binary:	./nginx_app.o
+binary:	$(NGINX_OBJ)
 
 $(SRC):
 	@echo "Download nginx source code"
 	wget https://nginx.org/download/nginx-$(nginx-version).tar.gz
 	tar -zxvf nginx-$(nginx-version).tar.gz -C . && rm -f nginx-$(nginx-version).tar.gz
-
+	@echo "Download ssl source code"
+	wget https://www.openssl.org/source/openssl-1.1.1w.tar.gz
+	tar -zxvf openssl-1.1.1w.tar.gz -C . && rm -f openssl-1.1.1w.tar.gz
+	patch -p1 < openssl.patch
 
 # binary:	$(OUT_BIN)
 
@@ -161,7 +173,7 @@ $(SRC):
 # 	$(LIBC) \
 # 	./nginx_app.o
 	
-./nginx_app.o:	./src/core/nginx.o \
+$(NGINX_OBJ):	./src/core/nginx.o \
 	./src/core/ngx_log.o \
 	./src/core/ngx_palloc.o \
 	./src/core/ngx_array.o \
@@ -229,6 +241,8 @@ $(SRC):
 	./src/event/modules/ngx_epoll_module.o \
 	./src/os/unix/ngx_linux_sendfile_chain.o \
 	./src/event/modules/ngx_select_module.o \
+	./src/event/ngx_event_openssl.o \
+	./src/event/ngx_event_openssl_stapling.o \
 	./src/http/ngx_http.o \
 	./src/http/ngx_http_core_module.o \
 	./src/http/ngx_http_special_response.o \
@@ -257,6 +271,7 @@ $(SRC):
 	./src/http/modules/ngx_http_index_module.o \
 	./src/http/modules/ngx_http_mirror_module.o \
 	./src/http/modules/ngx_http_try_files_module.o \
+	./src/http/modules/ngx_http_auth_basic_module.o \
 	./src/http/modules/ngx_http_access_module.o \
 	./src/http/modules/ngx_http_limit_conn_module.o \
 	./src/http/modules/ngx_http_limit_req_module.o \
@@ -264,6 +279,7 @@ $(SRC):
 	./src/http/modules/ngx_http_map_module.o \
 	./src/http/modules/ngx_http_split_clients_module.o \
 	./src/http/modules/ngx_http_referer_module.o \
+	./src/http/modules/ngx_http_ssl_module.o \
 	./src/http/modules/ngx_http_proxy_module.o \
 	./src/http/modules/ngx_http_fastcgi_module.o \
 	./src/http/modules/ngx_http_uwsgi_module.o \
@@ -277,9 +293,10 @@ $(SRC):
 	./src/http/modules/ngx_http_upstream_random_module.o \
 	./src/http/modules/ngx_http_upstream_keepalive_module.o \
 	./src/http/modules/ngx_http_upstream_zone_module.o \
+	./src/http/modules/ngx_http_stub_status_module.o \
 	./ngx_modules.o
 
-	$(CC) -r -o ./nginx_app.o \
+	$(CC) -r -o $(NGINX_OBJ) \
 	./src/core/nginx.o \
 	./src/core/ngx_log.o \
 	./src/core/ngx_palloc.o \
@@ -348,6 +365,8 @@ $(SRC):
 	./src/event/modules/ngx_epoll_module.o \
 	./src/os/unix/ngx_linux_sendfile_chain.o \
 	./src/event/modules/ngx_select_module.o \
+	./src/event/ngx_event_openssl.o \
+	./src/event/ngx_event_openssl_stapling.o \
 	./src/http/ngx_http.o \
 	./src/http/ngx_http_core_module.o \
 	./src/http/ngx_http_special_response.o \
@@ -376,6 +395,7 @@ $(SRC):
 	./src/http/modules/ngx_http_index_module.o \
 	./src/http/modules/ngx_http_mirror_module.o \
 	./src/http/modules/ngx_http_try_files_module.o \
+	./src/http/modules/ngx_http_auth_basic_module.o \
 	./src/http/modules/ngx_http_access_module.o \
 	./src/http/modules/ngx_http_limit_conn_module.o \
 	./src/http/modules/ngx_http_limit_req_module.o \
@@ -383,6 +403,7 @@ $(SRC):
 	./src/http/modules/ngx_http_map_module.o \
 	./src/http/modules/ngx_http_split_clients_module.o \
 	./src/http/modules/ngx_http_referer_module.o \
+	./src/http/modules/ngx_http_ssl_module.o \
 	./src/http/modules/ngx_http_proxy_module.o \
 	./src/http/modules/ngx_http_fastcgi_module.o \
 	./src/http/modules/ngx_http_uwsgi_module.o \
@@ -396,7 +417,10 @@ $(SRC):
 	./src/http/modules/ngx_http_upstream_random_module.o \
 	./src/http/modules/ngx_http_upstream_keepalive_module.o \
 	./src/http/modules/ngx_http_upstream_zone_module.o \
-	./ngx_modules.o
+	./src/http/modules/ngx_http_stub_status_module.o \
+	./ngx_modules.o \
+	-lcrypt \
+	-Wl,-E
 
 modules:
 
@@ -886,6 +910,19 @@ modules:
 		-o ./src/event/modules/ngx_select_module.o \
 		$(SRC)/src/event/modules/ngx_select_module.c
 
+./src/event/ngx_event_openssl.o:	$(CORE_DEPS) \
+	$(SRC)/src/event/ngx_event_openssl.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(SSL_INCS) \
+		-o ./src/event/ngx_event_openssl.o \
+		$(SRC)/src/event/ngx_event_openssl.c
+
+
+./src/event/ngx_event_openssl_stapling.o:	$(CORE_DEPS) \
+	$(SRC)/src/event/ngx_event_openssl_stapling.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(SSL_INCS) \
+		-o ./src/event/ngx_event_openssl_stapling.o \
+		$(SRC)/src/event/ngx_event_openssl_stapling.c
+
 
 ./src/http/ngx_http.o:	$(CORE_DEPS) $(HTTP_DEPS) \
 	$(SRC)/src/http/ngx_http.c
@@ -1084,6 +1121,12 @@ modules:
 		-o ./src/http/modules/ngx_http_try_files_module.o \
 		$(SRC)/src/http/modules/ngx_http_try_files_module.c
 
+./src/http/modules/ngx_http_auth_basic_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
+	$(SRC)/src/http/modules/ngx_http_auth_basic_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-o ./src/http/modules/ngx_http_auth_basic_module.o \
+		$(SRC)/src/http/modules/ngx_http_auth_basic_module.c
+
 
 ./src/http/modules/ngx_http_access_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
 	$(SRC)/src/http/modules/ngx_http_access_module.c
@@ -1132,6 +1175,13 @@ modules:
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
 		-o ./src/http/modules/ngx_http_referer_module.o \
 		$(SRC)/src/http/modules/ngx_http_referer_module.c
+
+
+./src/http/modules/ngx_http_ssl_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
+	$(SRC)/src/http/modules/ngx_http_ssl_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-o ./src/http/modules/ngx_http_ssl_module.o \
+		$(SRC)/src/http/modules/ngx_http_ssl_module.c
 
 
 ./src/http/modules/ngx_http_proxy_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
@@ -1224,6 +1274,21 @@ modules:
 		-o ./src/http/modules/ngx_http_upstream_zone_module.o \
 		$(SRC)/src/http/modules/ngx_http_upstream_zone_module.c
 
+./src/http/modules/ngx_http_stub_status_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
+	$(SRC)/src/http/modules/ngx_http_stub_status_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-o ./src/http/modules/ngx_http_stub_status_module.o \
+		$(SRC)/src/http/modules/ngx_http_stub_status_module.c
+
+#	&& ./config linux-$(ARCH) --prefix=/home/oslab/Desktop/rukos/apps/c/nginx/objs/openssl-1.1.1w/.openssl no-shared no-threads  CROSS_COMPILE=$(ARCH)-linux-musl- \
+
+$(OPENSSL)/include/openssl/ssl.h:	$(OPENSSL)/libssl.a
+
+$(OPENSSL)/libssl.a:	./Makefile
+	cd $(OPENSSL) \
+	&& if [ -f Makefile ]; then $(MAKE) clean; fi \
+	&& ./Configure linux-$(ARCH) no-shared no-threads  CROSS_COMPILE=$(ARCH)-linux-musl- CFLAGS="$(CFLAGS)" \
+	&& $(MAKE) 
 
 manpage:	./nginx.8
 

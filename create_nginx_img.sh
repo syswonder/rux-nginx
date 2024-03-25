@@ -6,13 +6,13 @@ CUR_DIR=$(dirname $0)
 echo $OUT_DIR
 
 if [ $# -lt 1 ]; then
-  CONF="$CUR_DIR/nginx.conf"
+  CONF="$CUR_DIR/nginx_https.conf"
   echo "not us 9p"
 elif [ "$1" == "9p" ]; then
   CONF="$CUR_DIR/nginx_9p.conf"
   echo "use 9p"
 else
-  CONF="$CUR_DIR/nginx.conf"
+  CONF="$CUR_DIR/nginx_https.conf"
   echo "not use 9p"
 fi
 
@@ -28,6 +28,9 @@ create_test_img() {
 	mkdir -p "mnt/nginx/conf"
 	cp "$CONF" "mnt/nginx/conf/nginx.conf"
 	cp "$CUR_DIR/mime.types" "mnt/nginx/conf/mime.types"
+	mkdir -p "mnt/nginx/ssl"
+	cp "$CUR_DIR/https.crt" "mnt/nginx/ssl/https.crt"
+	cp "$CUR_DIR/https.key" "mnt/nginx/ssl/https.key"
 	mkdir -p "mnt/html"
 	cp -r "$CUR_DIR/html" "mnt/"
 	sudo umount mnt
