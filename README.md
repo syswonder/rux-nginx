@@ -19,19 +19,6 @@ To run nginx on RuxOS, you should download this repo to its apps directory
 git clone https://github.com/syswonder/rux-nginx.git ./apps/c/nginx
 ```
 
-### download web page
-
-You should make sure there is a html folder in apps/c/nginx which contains the web page of nginx server.
-
-If you not use your own web page , you can run commands below:
-
-```shell
-git clone https://github.com/syswonder/syswonder-web.git
-mkdir -p apps/c/nginx/html
-cp -r syswonder-web/docs/* apps/c/nginx/html
-rm -f -r syswonder-web
-```
-
 ### run nginx
 
 The commands below is to run nginx with different features.  These examples run in aarch64 with musl, if you want to run in x86_64, just replace `ARCH=aarch64` with `ARCH=x86_64`, and if you do not want to run with musl , just delete `MUSL=y`.
@@ -54,7 +41,16 @@ If you change running option or source code , remember to clean the compile file
 make clean_c A=apps/c/nginx
 ```
 
+### run example
+
+You can just use command next to run our example
+
+```bash
+bash ./apps/c/nginx/example_run.sh
+```
+
 ## ruxgo
+
 If you want to use [ruxgo](https://github.com/syswonder/ruxgo.git) to run nginx, remember to run `apps/c/nginx/create_nginx_img.sh` first to make sure disk.img is right, or you can build your own disk.img
 
 You can copy `ruxgo/apps/nginx/ruxos/config_linux.toml`  to nginx directory and run ruxgo
