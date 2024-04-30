@@ -257,6 +257,7 @@ $(SRC):
 	./src/http/modules/ngx_http_index_module.o \
 	./src/http/modules/ngx_http_mirror_module.o \
 	./src/http/modules/ngx_http_try_files_module.o \
+	./src/http/modules/ngx_http_auth_basic_module.o \
 	./src/http/modules/ngx_http_access_module.o \
 	./src/http/modules/ngx_http_limit_conn_module.o \
 	./src/http/modules/ngx_http_limit_req_module.o \
@@ -277,6 +278,7 @@ $(SRC):
 	./src/http/modules/ngx_http_upstream_random_module.o \
 	./src/http/modules/ngx_http_upstream_keepalive_module.o \
 	./src/http/modules/ngx_http_upstream_zone_module.o \
+	./src/http/modules/ngx_http_stub_status_module.o \
 	./ngx_modules.o
 
 	$(CC) -r -o ./nginx_app.o \
@@ -376,6 +378,7 @@ $(SRC):
 	./src/http/modules/ngx_http_index_module.o \
 	./src/http/modules/ngx_http_mirror_module.o \
 	./src/http/modules/ngx_http_try_files_module.o \
+	./src/http/modules/ngx_http_auth_basic_module.o \
 	./src/http/modules/ngx_http_access_module.o \
 	./src/http/modules/ngx_http_limit_conn_module.o \
 	./src/http/modules/ngx_http_limit_req_module.o \
@@ -396,7 +399,9 @@ $(SRC):
 	./src/http/modules/ngx_http_upstream_random_module.o \
 	./src/http/modules/ngx_http_upstream_keepalive_module.o \
 	./src/http/modules/ngx_http_upstream_zone_module.o \
-	./ngx_modules.o
+	./src/http/modules/ngx_http_stub_status_module.o \
+	./ngx_modules.o \
+	-lcrypt
 
 modules:
 
@@ -1085,6 +1090,13 @@ modules:
 		$(SRC)/src/http/modules/ngx_http_try_files_module.c
 
 
+./src/http/modules/ngx_http_auth_basic_module.o: $(CORE_DEPS) $(HTTP_DEPS) \
+	$(SRC)/src/http/modules/ngx_http_auth_basic_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-o ./src/http/modules/ngx_http_auth_basic_module.o \
+		$(SRC)/src/http/modules/ngx_http_auth_basic_module.c
+
+
 ./src/http/modules/ngx_http_access_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
 	$(SRC)/src/http/modules/ngx_http_access_module.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
@@ -1223,6 +1235,12 @@ modules:
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
 		-o ./src/http/modules/ngx_http_upstream_zone_module.o \
 		$(SRC)/src/http/modules/ngx_http_upstream_zone_module.c
+
+./src/http/modules/ngx_http_stub_status_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
+	$(SRC)/src/http/modules/ngx_http_stub_status_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-o ./src/http/modules/ngx_http_stub_status_module.o \
+		$(SRC)/src/http/modules/ngx_http_stub_status_module.c
 
 
 manpage:	./nginx.8

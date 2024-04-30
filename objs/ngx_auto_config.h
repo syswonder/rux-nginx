@@ -2,10 +2,9 @@
   --prefix=/nginx \
   --with-http_sub_module \
   --with-select_module \
+  --with-http_stub_status_module \
   --without-http_gzip_module \
   --without-pcre \
-  --without-http_rewrite_module \
-  --without-http_auth_basic_module \
   --without-http-cache"
 
 #ifndef NGX_DEBUG
@@ -110,10 +109,8 @@
 #define NGX_HAVE_STATVFS  1
 #endif
 
-#ifdef CONFIG_LIBNGINX_HTTP_UPSTREAM_RANDOM
 #ifndef NGX_STAT_STUB
 #define NGX_STAT_STUB  1
-#endif
 #endif
 
 #ifndef NGX_HAVE_DLOPEN
@@ -365,14 +362,8 @@
 #endif
 #endif
 
-#ifdef CONFIG_LIBCRYPTO
 #ifndef NGX_CRYPT
 #define NGX_CRYPT  1
-#endif
-#else
-#ifndef NGX_CRYPT
-#define NGX_CRYPT  0
-#endif
 #endif
 
 #ifndef NGX_HTTP_X_FORWARDED_FOR

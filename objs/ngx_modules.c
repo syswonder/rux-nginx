@@ -20,6 +20,7 @@ extern ngx_module_t  ngx_http_autoindex_module;
 extern ngx_module_t  ngx_http_index_module;
 extern ngx_module_t  ngx_http_mirror_module;
 extern ngx_module_t  ngx_http_try_files_module;
+extern ngx_module_t  ngx_http_auth_basic_module;
 extern ngx_module_t  ngx_http_access_module;
 extern ngx_module_t  ngx_http_limit_conn_module;
 extern ngx_module_t  ngx_http_limit_req_module;
@@ -40,6 +41,7 @@ extern ngx_module_t  ngx_http_upstream_least_conn_module;
 extern ngx_module_t  ngx_http_upstream_random_module;
 extern ngx_module_t  ngx_http_upstream_keepalive_module;
 extern ngx_module_t  ngx_http_upstream_zone_module;
+extern ngx_module_t  ngx_http_stub_status_module;
 extern ngx_module_t  ngx_http_write_filter_module;
 extern ngx_module_t  ngx_http_header_filter_module;
 extern ngx_module_t  ngx_http_chunked_filter_module;
@@ -71,6 +73,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_index_module,
     &ngx_http_mirror_module,
     &ngx_http_try_files_module,
+    &ngx_http_auth_basic_module,
     &ngx_http_access_module,
     &ngx_http_limit_conn_module,
     &ngx_http_limit_req_module,
@@ -91,6 +94,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_upstream_random_module,
     &ngx_http_upstream_keepalive_module,
     &ngx_http_upstream_zone_module,
+    &ngx_http_stub_status_module,
     &ngx_http_write_filter_module,
     &ngx_http_header_filter_module,
     &ngx_http_chunked_filter_module,
@@ -124,6 +128,7 @@ char *ngx_module_names[] = {
     "ngx_http_index_module",
     "ngx_http_mirror_module",
     "ngx_http_try_files_module",
+    "ngx_http_auth_basic_module",
     "ngx_http_access_module",
     "ngx_http_limit_conn_module",
     "ngx_http_limit_req_module",
@@ -144,6 +149,7 @@ char *ngx_module_names[] = {
     "ngx_http_upstream_random_module",
     "ngx_http_upstream_keepalive_module",
     "ngx_http_upstream_zone_module",
+    "ngx_http_stub_status_module",
     "ngx_http_write_filter_module",
     "ngx_http_header_filter_module",
     "ngx_http_chunked_filter_module",
